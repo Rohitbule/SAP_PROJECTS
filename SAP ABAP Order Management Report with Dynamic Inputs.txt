@@ -1,24 +1,6 @@
-*&---------------------------------------------------------------------*
-*& Report  ZRB6_DB1
-*&
-*&---------------------------------------------------------------------*
-*&
-*&
-*&---------------------------------------------------------------------*
-
 REPORT  ZRB6_DB1.
 
-*TYPES : BEGIN OF STRUCTURE,
-*        MANDT TYPE MANDT,
-*        ONUMBER TYPE ZONUMBER ,
-*        ODATE    TYPE   ZDATEORDER ,
-*        OPAYMENT  TYPE   ZOPAYMENT ,
-*        OTOTALAMOUNT TYPE  ZOTOTALAMOUNT ,
-*        OCURRENCY TYPE ZOCURRENCY ,
-*        END OF STRUCTURE.
-*
-
-DATA : WA TYPE ZBR6_ORDH.
+DATA : WA TYPE ZBR6_ORDH.   "create an work area for the header table.
 
 TYPES : BEGIN OF STRUCTURE,
         ONUMBER TYPE ZONUMBER ,
@@ -46,14 +28,16 @@ PARAMETERS : P_R2 TYPE C RADIOBUTTON GROUP R1.
 PARAMETERS : P_R3 TYPE C RADIOBUTTON GROUP R1.
 PARAMETERS : P_R4 TYPE C RADIOBUTTON GROUP R1 DEFAULT 'X'.
 
+
+"the events calls when user clicks on execute buttton on the selection screen
 START-OF-SELECTION.
-  IF P_R1 = 'X'.
+  IF P_R1 = 'X'.                  "this is for an insertion purpose
     WA-ONUMBER = P_ONO.
     WA-ODATE = P_ODATE.
     WA-OPAYMENT = P_OPM.
     WA-OTOTALAMOUNT = P_OTA.
     WA-OCURRENCY = P_OCURR.
-    INSERT ZBR6_ORDH FROM WA.
+    INSERT ZBR6_ORDH FROM WA.    "data is moving from work area to databse table.
       IF  SY-SUBRC = 0.
             WRITE : / 'RECORD INSERTED SUCCESSFULLY ' .
           ELSE.
@@ -61,15 +45,15 @@ START-OF-SELECTION.
       ENDIF.
   ENDIF.
 
-  IF P_R2 = 'X'.
+IF P_R2 = 'X'.                  "this is for an deletion purpose
     WA-ONUMBER = P_ONO.
     DELETE ZBR6_ORDH FROM WA.
     IF SY-SUBRC = 0.
       WRITE : / 'RECORD DELETED SUCCESSFULLY ' , ':' , P_ONO.
     ENDIF.
-  ENDIF.
+ENDIF.
 
-  IF P_R3 = 'X'.
+IF P_R3 = 'X'.            "this is for update radio button purpose.
     WA-ONUMBER = P_ONO.
     WA-ODATE = P_ODATE.
     WA-OPAYMENT = P_OPM.
@@ -78,9 +62,9 @@ START-OF-SELECTION.
     IF SY-SUBRC = 0.
       WRITE : 'RECORD UPDATED SUCCESSFULLY ' , ':' , P_ONO.
     ENDIF.
-  ENDIF.
+ENDIF.
 
-  IF P_R4 = 'X'.
+IF P_R4 = 'X'.          "this is for modified radio button purpose.
     WA-ONUMBER = P_ONO.
     WA-ODATE = P_ODATE.
     WA-OPAYMENT = P_OPM.
@@ -89,21 +73,16 @@ START-OF-SELECTION.
     IF SY-SUBRC = 0.
       WRITE : 'RECORD MODIFIED SUCCESSFULLY ' , ':' , P_ONO.
     ENDIF.
-  ENDIF.
+ENDIF.
 
 
+"this event is trigger after providing the input on the selectio screen.
 AT SELECTION-SCREEN.
- IF P_R1 = 'X'.
+IF P_R1 = 'X'.
       SELECT ONUMBER
       FROM ZBR6_ORDH
       INTO TABLE IT
       WHERE ONUMBER = P_ONO.
-
-*      SELECT SINGLE ONUMBER
-*        FROM ZBR6_ORDH
-*        INTO WA1
-*        WHERE ONUMBER = P_ONO.
-
       IF SY-SUBRC = 0.
         MESSAGE E006(ZRB6_MR1) WITH P_ONO.
       ENDIF.
@@ -119,7 +98,7 @@ AT SELECTION-SCREEN.
      ENDIF.
  ENDIF.
 
-  IF P_R3 = 'X'.
+IF P_R3 = 'X'.
      SELECT SINGLE ONUMBER
      FROM ZBR6_ORDH
      INTO WA1
@@ -132,7 +111,7 @@ AT SELECTION-SCREEN.
          FROM ZBR6_ORDH
          INTO WA2
          WHERE ONUMBER = P_ONO.
-  ENDIF.
+ENDIF.
 
   IF P_R4 = 'X'.
      SELECT SINGLE ONUMBER
@@ -145,26 +124,27 @@ AT SELECTION-SCREEN.
   ENDIF.
 
 
- AT SELECTION-SCREEN OUTPUT.
-   IF P_R2 = 'X'.
+"this purpose of this event is to modify thr selection screen before it is displayed.
+AT SELECTION-SCREEN OUTPUT.
+IF P_R2 = 'X'.
        LOOP AT SCREEN.
           IF SCREEN-GROUP1 = 'A1' OR SCREEN-GROUP1 = 'A2' OR SCREEN-GROUP1 = 'A3' OR SCREEN-GROUP1 = 'A4'.
              SCREEN-ACTIVE = 0.
              MODIFY SCREEN.
           ENDIF.
        ENDLOOP.
-   ENDIF.
+ENDIF.
 
-   IF P_R3 = 'X'.
+IF P_R3 = 'X'.
     P_ODATE = WA2-ODATE.
     P_OPM = WA2-OPAYMENT.
     P_OTA = WA2-OTOTALAMOUNT.
     P_OCURR = WA2-OCURRENCY.
-   ENDIF.
+ENDIF.
 
-   IF P_R4 = 'X'.
+IF P_R4 = 'X'.
     P_ODATE = WA2-ODATE.
     P_OPM = WA2-OPAYMENT.
     P_OTA = WA2-OTOTALAMOUNT.
     P_OCURR = WA2-OCURRENCY.
-   ENDIF.
+ENDIF.
